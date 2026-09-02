@@ -35,6 +35,7 @@ export class Client {
       this.readSummary(summary)
       this.gui.setup()
     })
+    this.socket.on('token', (token: string) => this.checkToken(token))
     setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
@@ -49,5 +50,15 @@ export class Client {
 
   update(): void {
     this.time += tickInterval
+  }
+
+  checkToken(token: string): void {
+    if (this.token === '') {
+      this.token = token
+      return
+    }
+    if (token !== this.token) {
+      location.reload()
+    }
   }
 }
