@@ -21,6 +21,7 @@ export class Messenger {
   setupIo(): void {
     this.io.on('connection', socket => {
       console.log(socket.id, 'connected')
+      socket.emit('summary', this.game.summarize())
     })
   }
 

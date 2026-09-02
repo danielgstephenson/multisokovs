@@ -1,8 +1,9 @@
-import { range, sample } from '../web/shared/math.js'
-import { getOutcome } from '../web/shared/state.js'
+import { range, sample } from '../shared/math.js'
+import { getOutcome } from '../shared/state.js'
 import { Messenger } from './messenger.js'
-import { tickInterval } from '../web/shared/parameters.js'
+import { tickInterval } from '../shared/parameters.js'
 import { getStartingState } from './startingState.js'
+import type { GameSummary } from '../shared/summary.js'
 
 export class Game {
   time = 0
@@ -19,7 +20,7 @@ export class Game {
     const advantage = sample([0, 1])
     this.state = getStartingState(level, advantage)
     this.messenger = new Messenger(this)
-    this.messenger.listen(3000)
+    void this.messenger.listen(3000)
   }
 
   update(): void {
@@ -27,7 +28,7 @@ export class Game {
     this.time += tickInterval
     if (this.phase === 'end') {
       if (this.countdown === 0) {
-        void this.onMatchComplete()
+        this.onMatchComplete()
       }
     }
   }
@@ -44,5 +45,16 @@ export class Game {
 
   advance(dir: number): void {
     this.state = getOutcome(this.state, dir)
+  }
+
+  summarize(): GameSummary {
+    return {
+      phase: this.phase,
+      state: this.state,
+      round: this.round,
+      winner: this.winner,
+      countdown: this.countdown,
+      angle: this.angle,
+    }
   }
 }

@@ -6,7 +6,7 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "build": "node scripts/copy.mjs && tsc -p web && tsc",
+    "build": "node scripts/copy.mjs && tsc -p web --noEmit && node scripts/bundle.mjs && tsc",
     "dev": "npm run build && node dist/src/index.js",
     "start": "node dist/src/index.js",
     "typecheck": "tsc --noEmit && tsc -p web --noEmit",
