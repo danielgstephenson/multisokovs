@@ -1,15 +1,21 @@
 import { G, SVG } from '@svgdotjs/svg.js'
 import type { Client } from './client.js'
-import { gridSize } from '../shared/parameters.js'
+import { gridSize, unitCount } from '../shared/parameters.js'
 import { Grid } from './grid.js'
+import { Header } from './header.js'
+import { Unit } from './unit.js'
+import { range, type Vec2 } from '../shared/math.js'
 
 export class GUI {
   client: Client
   svgDiv = document.getElementById('svgDiv') as HTMLDivElement
   svg = SVG().addTo('#svgDiv')
   padding = 1.25
+  focus: Vec2 = { x: 0, y: 0 }
   world: G
   grid: Grid
+  header: Header
+  units: Unit[] = []
 
   constructor(client: Client) {
     this.client = client
@@ -17,10 +23,23 @@ export class GUI {
     window.addEventListener('resize', () => this.onResize())
     this.world = this.makeWorld()
     this.grid = new Grid(this)
+    this.header = new Header(this)
+    range(unitCount).forEach(rank => new Unit(this, rank))
+    this.updateFocus()
   }
 
   update(): void {
     this.grid.update()
+    this.header.update()
+    this.units.forEach(unit => unit.update())
+    this.updateFocus()
+  }
+
+  setup(): void {
+    this.grid.update()
+    this.header.update()
+    this.units.forEach(unit => unit.setup())
+    this.updateFocus()
   }
 
   makeWorld(): G {
@@ -40,5 +59,19 @@ export class GUI {
     const vmin = Math.min(window.innerWidth, window.innerHeight)
     const scale = 1
     this.svg.size(scale * vmin, scale * vmin)
+  }
+
+  updateFocus(): void {
+    const rank = this.client.round % unitCount
+    const svgPoint = this.svg.node.createSVGPoint()
+    svgPoint.x = 0
+    svgPoint.y = 0
+    const unitGroup = this.units[rank].group
+    const unitElement = unitGroup.node
+    const transform = unitElement.getScreenCTM()
+    if (transform == null) return
+    const screenPoint = svgPoint.matrixTransform(transform)
+    this.focus.x = screenPoint.x
+    this.focus.y = screenPoint.y
   }
 }
