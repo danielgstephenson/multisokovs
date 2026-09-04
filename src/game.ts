@@ -14,13 +14,14 @@ export class Game {
   angle = sample(range(4))
   state: number
   messenger: Messenger
+  id: string
 
-  constructor() {
+  constructor(messenger: Messenger, id: string) {
+    this.messenger = messenger
+    this.id = id
     const level = sample(range(10, 30))
     const advantage = sample([0, 1])
     this.state = getStartingState(level, advantage)
-    this.messenger = new Messenger(this)
-    void this.messenger.listen(3000)
   }
 
   update(): void {

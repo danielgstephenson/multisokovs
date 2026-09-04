@@ -3,26 +3,34 @@ import { type Express } from 'express'
 import { makeServer } from './server.js'
 import { type IOServer } from './server.js'
 import { once } from 'node:events'
-import type { Game } from './game.js'
+import { Game } from './game.js'
 
 export class Messenger {
   token = `${Math.random()}`
-  game: Game
+  games = new Map<string, Game>()
   app: Express
   io: IOServer
 
-  constructor(game: Game) {
-    this.game = game
+  constructor() {
     this.app = express()
     this.io = makeServer(this.app)
     this.setupIo()
+    void this.listen(3000)
   }
 
   setupIo(): void {
     this.io.on('connection', socket => {
+      const rawGameId: unknown = socket.handshake.auth.gameId
+      const gameId = typeof rawGameId === 'string' ? rawGameId : ''
+      let game = this.games.get(gameId)
+      if (game == null) {
+        game = new Game(this, gameId)
+        this.games.set(gameId, game)
+      }
       console.log(socket.id, 'connected')
+      void socket.join(gameId)
       socket.emit('token', this.token)
-      socket.emit('setup', this.game.summarize())
+      socket.emit('setup', game.summarize())
     })
   }
 

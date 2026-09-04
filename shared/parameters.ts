@@ -15,7 +15,7 @@ export const moveInterval = 0.75
 export const choiceInterval = 15
 export const endInterval = 3
 export const teamInterval = 2
-export const maxRound = 100
+export const maxRound = 50
 export const discount = 0.8
 
 export const actionVecs = [

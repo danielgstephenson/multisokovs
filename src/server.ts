@@ -13,6 +13,13 @@ export function makeServer(app: Express): IOServer {
     connectionStateRecovery: {},
   })
   const publicDir = join(import.meta.dirname, '..', '..', 'public')
-  app.use(express.static(publicDir))
+  app.get('/', (_req, res) => {
+    const id = Math.random().toString(36).slice(2, 8)
+    res.redirect(`/${id}`)
+  })
+  app.use(express.static(publicDir, { index: false }))
+  app.get('/:id', (_req, res) => {
+    res.sendFile(join(publicDir, 'index.html'))
+  })
   return io
 }

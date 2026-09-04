@@ -1,3 +1,3 @@
-import { Game } from './game.js'
+import { Messenger } from './messenger.js'
 
-void new Game()
+void new Messenger()

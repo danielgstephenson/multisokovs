@@ -1,11 +1,12 @@
 import type { GameSummary } from '../shared/summary.js'
 import { GUI } from './gui.js'
-import { io } from 'socket.io-client'
+import { io, Socket } from 'socket.io-client'
 import * as opentype from 'opentype.js'
 import { tickInterval, timeScale } from '../shared/parameters.js'
 
 export class Client {
-  socket = io()
+  gameId: string
+  socket: Socket
   token = ''
   time = 0
   team = 0
@@ -18,8 +19,10 @@ export class Client {
   font: opentype.Font
   gui: GUI
 
-  constructor(font: opentype.Font) {
+  constructor(font: opentype.Font, gameId: string) {
     this.font = font
+    this.gameId = gameId
+    this.socket = io({ auth: { gameId } })
     this.gui = new GUI(this)
     this.socket.on('connect', () => {
       console.log('connected', this.socket.id)

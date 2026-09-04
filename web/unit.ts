@@ -1,4 +1,4 @@
-import type { G, Rect } from '@svgdotjs/svg.js'
+import type { G } from '@svgdotjs/svg.js'
 import { stateToLocs } from '../shared/state.js'
 import type { GUI } from './gui.js'
 import { range, sample } from '../shared/math.js'
@@ -12,7 +12,6 @@ export class Unit {
   team: number
   dir: number
   group: G
-  pointer: Rect
   body: G
   moving = false
 
@@ -35,13 +34,7 @@ export class Unit {
       rotate: 90 * this.dir,
     })
     const color = teamColors[this.team]
-    const circle = this.body.circle(0.9).center(0, 0).fill(color)
-    const square = this.body.rect(1, 1).center(0, 0).fill('white')
-    const pointerMask = this.body.mask().add(square)
-    this.pointer = this.body.rect(0.2, 0.15).center(0.4, 0).fill('black')
-    if (this.rank > 0) this.pointer.opacity(0)
-    pointerMask.add(this.pointer)
-    circle.maskWith(pointerMask)
+    this.body.circle(0.9).center(0, 0).fill(color)
     const text = (rank + 1).toFixed(0)
     const path = this.client.font.getPath(text, 0, 0, 0.7)
     const box = path.getBoundingBox()
@@ -84,6 +77,5 @@ export class Unit {
       translateY: 0,
       rotate: 90 * (this.dir + this.client.angle),
     })
-    this.pointer.opacity(0)
   }
 }
