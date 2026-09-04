@@ -34,7 +34,9 @@ export class Header {
       const opacity = flashing ? flashOpacity : 1
       flag.opacity(opacity)
       flag.fill(fillColor)
-      if (this.client.team !== team && this.client.takenTeams.includes(team)) {
+      if (this.client.phase !== 'team') return
+      if (this.client.team === team) return
+      if (this.client.takenTeams.includes(team)) {
         flag.opacity(0)
       }
     })

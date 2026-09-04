@@ -1,7 +1,7 @@
 import { range, sample } from '../shared/math.js'
 import { getOutcome } from '../shared/state.js'
 import { Messenger } from './messenger.js'
-import { tickInterval } from '../shared/parameters.js'
+import { tickInterval, timeScale } from '../shared/parameters.js'
 import { getStartingState } from './startingState.js'
 import type { GameSummary } from '../shared/summary.js'
 import type { Player } from './player.js'
@@ -25,12 +25,18 @@ export class Game {
     const level = sample(range(10, 30))
     const advantage = sample([0, 1])
     this.state = getStartingState(level, advantage)
+    setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
   update(): void {
     this.countdown = Math.max(0, this.countdown - tickInterval)
     this.time += tickInterval
-    if (this.phase === 'end') {
+    if (this.phase === 'team') {
+      if (this.takenTeams.length > 1) {
+        console.log(this.takenTeams)
+        this.phase = 'choice'
+      }
+    } else if (this.phase === 'end') {
       if (this.countdown === 0) {
         this.onMatchComplete()
       }

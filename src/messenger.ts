@@ -45,7 +45,10 @@ export class Messenger {
   update(): void {
     this.games.forEach(game => {
       game.players = game.players.filter(p => p.socket.connected)
-      game.takenTeams = [...new Set(game.players.map(p => p.team))]
+      const teams = new Set([0, 1])
+      const playerTeams = new Set(game.players.map(p => p.team))
+      const takenTeams = teams.intersection(playerTeams)
+      game.takenTeams = [...takenTeams]
       game.players.forEach(player => {
         player.socket.emit('summary', player.summarize())
       })
