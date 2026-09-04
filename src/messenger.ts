@@ -1,5 +1,6 @@
 import express from 'express'
 import { type Express } from 'express'
+import { Server as HttpsServer } from 'node:https'
 import { makeServer } from './server.js'
 import { type IOServer } from './server.js'
 import { once } from 'node:events'
@@ -16,7 +17,9 @@ export class Messenger {
     this.app = express()
     this.io = makeServer(this.app)
     this.setupIo()
-    void this.listen(3000)
+    const secure = this.io.httpServer instanceof HttpsServer
+    const port = secure ? 443 : 3000
+    void this.listen(port)
     setInterval(() => this.update(), 100)
   }
 
@@ -61,12 +64,17 @@ export class Messenger {
       game.players.forEach(player => {
         player.socket.emit('summary', player.summarize())
       })
+      if (game.players.length === 0) {
+        game.stop()
+      }
     })
   }
 
   async listen(port: number): Promise<void> {
     const server = this.io.httpServer
-    server.listen(port, () => console.log(`listening on http://localhost:${port}`))
+    const secure = server instanceof HttpsServer
+    const location = secure ? `port ${port}` : `http://localhost:${port}`
+    server.listen(port, () => console.log(`listening on ${location}`))
     await once(server, 'listening')
   }
 }

@@ -1,6 +1,6 @@
 import { range, sample } from '../shared/math.js'
 import { getOutcome, stateToLocs } from '../shared/state.js'
-import { Messenger } from './messenger.js'
+import { type Messenger } from './messenger.js'
 import { endInterval, goals, maxRound, tickInterval, timeScale } from '../shared/parameters.js'
 import { getStartingState } from './startingState.js'
 import type { GameSummary } from '../shared/summary.js'
@@ -18,12 +18,13 @@ export class Game {
   state: number
   messenger: Messenger
   id: string
+  interval: NodeJS.Timeout
 
   constructor(messenger: Messenger, id: string) {
     this.messenger = messenger
     this.id = id
     this.state = this.reset()
-    setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
+    this.interval = setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
   update(): void {
@@ -95,6 +96,11 @@ export class Game {
       })
     })
     return scores
+  }
+
+  stop(): void {
+    clearInterval(this.interval)
+    this.messenger.games.delete(this.id)
   }
 
   summarize(): GameSummary {

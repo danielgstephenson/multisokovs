@@ -1,6 +1,6 @@
 import type { PlayerSummary } from '../shared/summary.js'
 import { GUI } from './gui.js'
-import { io, Socket } from 'socket.io-client'
+import { io, type Socket } from 'socket.io-client'
 import * as opentype from 'opentype.js'
 import { tickInterval, timeScale } from '../shared/parameters.js'
 import { Input } from './input.js'
@@ -17,7 +17,7 @@ export class Client {
   round = 0
   winner = -1
   countdown = 0
-  phase = 'choice'
+  phase = 'team'
   font: opentype.Font
   gui: GUI
   input: Input
@@ -32,9 +32,6 @@ export class Client {
       console.log('connected', this.socket.id)
     })
     this.socket.on('token', (token: string) => this.checkToken(token))
-    this.socket.on('team', (team: number) => {
-      this.team = team
-    })
     this.socket.on('summary', (summary: PlayerSummary) => {
       this.readSummary(summary)
       this.gui.update()

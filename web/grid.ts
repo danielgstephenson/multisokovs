@@ -12,7 +12,6 @@ import {
   maxRound,
   teamColors,
   tieColor,
-  unitCount,
 } from '../shared/parameters.js'
 import { stateToLocs } from '../shared/state.js'
 import type { Client } from './client.js'
@@ -63,17 +62,13 @@ export class Grid {
     this.clearHighlights()
     const unitLocs = stateToLocs(this.client.state)
     const activeTeam = this.client.round % 2
-    range(unitCount).forEach(i => {
-      const loc = unitLocs[i]
-      const position = getPosition(loc, this.client.angle)
-      const highlight = this.highlights[position.x][position.y]
-      if (i !== 0 || this.client.phase !== 'choice') {
-        return
-      }
-      highlight.front()
-      const alpha = activeTeam === this.client.team ? 0.7 : 0.3
-      highlight.opacity(alpha)
-    })
+    if (this.client.phase !== 'choice') return
+    const loc = unitLocs[0]
+    const position = getPosition(loc, this.client.angle)
+    const highlight = this.highlights[position.x][position.y]
+    highlight.front()
+    const alpha = activeTeam === this.client.team ? 0.7 : 0.3
+    highlight.opacity(alpha)
   }
 
   clearHighlights(): void {
@@ -94,7 +89,7 @@ export class Grid {
     this.goalRects.forEach(goalRect => {
       const sideLength = goalRect.bbox().width
       const perimeter = 4 * sideLength
-      const b = (perimeter * (this.client.round - 1)) / maxRound
+      const b = (perimeter * this.client.round) / maxRound
       const a = perimeter - b
       goalRect.attr('stroke-dasharray', `${a} ${b}`)
     })

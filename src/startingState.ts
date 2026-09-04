@@ -1,15 +1,15 @@
-import { readFileSync } from "fs"
+import { readFileSync } from 'fs'
 
-function getDataView (filePath: string): DataView {
+function getDataView(filePath: string): DataView {
   const buffer = readFileSync(filePath)
   const arrayBuffer = buffer.buffer
-  return new DataView(arrayBuffer)
+  return new DataView(arrayBuffer, buffer.byteOffset, buffer.byteLength)
 }
 
 const startingStates0 = getDataView('startingStates0.bin')
 const startingStates1 = getDataView('startingStates1.bin')
 
-export function getStartingState (level: number, advantage: number): number {
+export function getStartingState(level: number, advantage: number): number {
   const sampleSize = 10000
   const startIndex = (level - 1) * sampleSize
   const index0 = startIndex + Math.floor(Math.random() * sampleSize)
