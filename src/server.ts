@@ -15,10 +15,10 @@ export function makeServer(app: Express): IOServer {
   const publicDir = join(import.meta.dirname, '..', '..', 'public')
   app.get('/', (_req, res) => {
     const id = Math.random().toString(36).slice(2, 8)
-    res.redirect(`/${id}`)
+    res.redirect(`/game/${id}`)
   })
   app.use(express.static(publicDir, { index: false }))
-  app.get('/:id', (_req, res) => {
+  app.get('/game/:id', (_req, res) => {
     res.sendFile(join(publicDir, 'index.html'))
   })
   return io

@@ -9,7 +9,7 @@ export class Client {
   socket: Socket
   token = ''
   time = 0
-  team = 0
+  team = -1
   angle = 0
   state = 0
   round = 0
@@ -53,6 +53,7 @@ export class Client {
 
   update(): void {
     this.time += tickInterval
+    this.gui.update()
   }
 
   checkToken(token: string): void {

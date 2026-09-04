@@ -10,7 +10,7 @@ export class Game {
   round = 0
   countdown = 0
   winner = -1
-  phase = 'choice'
+  phase = 'team'
   angle = sample(range(4))
   state: number
   messenger: Messenger
