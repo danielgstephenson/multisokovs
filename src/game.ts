@@ -1,7 +1,7 @@
 import { range, sample } from '../shared/math.js'
-import { getOutcome } from '../shared/state.js'
+import { getOutcome, stateToLocs } from '../shared/state.js'
 import { Messenger } from './messenger.js'
-import { tickInterval, timeScale } from '../shared/parameters.js'
+import { endInterval, goals, maxRound, tickInterval, timeScale } from '../shared/parameters.js'
 import { getStartingState } from './startingState.js'
 import type { GameSummary } from '../shared/summary.js'
 import type { Player } from './player.js'
@@ -36,11 +36,30 @@ export class Game {
         console.log(this.takenTeams)
         this.phase = 'choice'
       }
+    } else if (this.phase === 'move') {
+      if (this.countdown === 0) {
+        this.onMoveComplete()
+      }
     } else if (this.phase === 'end') {
       if (this.countdown === 0) {
         this.onMatchComplete()
       }
     }
+  }
+
+  onMoveComplete(): void {
+    this.round += 1
+    const scores = this.getScores()
+    const maxScore = Math.max(...scores)
+    range(2).forEach(team => {
+      if (scores[team] > 1) this.winner = team
+    })
+    if (maxScore > 1 || this.round > maxRound) {
+      this.phase = 'end'
+      this.countdown = endInterval
+      return
+    }
+    this.phase = 'choice'
   }
 
   onMatchComplete(): void {
@@ -56,9 +75,21 @@ export class Game {
   advance(dir: number): void {
     this.state = getOutcome(this.state, dir)
     this.phase = 'move'
+    this.countdown = 1
     this.players.forEach(player => {
       player.socket.emit('move', player.summarize())
     })
+  }
+
+  getScores(): number[] {
+    const scores = [0, 0]
+    stateToLocs(this.state).forEach((unitLoc, i) => {
+      const team = (this.round + i) % 2
+      goals.forEach(goal => {
+        if (goal === unitLoc) scores[team] += 1
+      })
+    })
+    return scores
   }
 
   summarize(): GameSummary {
