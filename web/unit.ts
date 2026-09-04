@@ -1,7 +1,6 @@
 import type { G } from '@svgdotjs/svg.js'
 import { stateToLocs } from '../shared/state.js'
 import type { GUI } from './gui.js'
-import { range, sample } from '../shared/math.js'
 import { getPosition, moveInterval, teamColors, unitCount } from '../shared/parameters.js'
 import type { Client } from './client.js'
 
@@ -10,7 +9,6 @@ export class Unit {
   client: Client
   rank: number
   team: number
-  dir: number
   group: G
   body: G
   moving = false
@@ -21,18 +19,11 @@ export class Unit {
     this.rank = rank
     this.gui.units[this.rank] = this
     this.team = this.rank % 2
-    this.dir = sample(range(4))
-    const loc = stateToLocs(this.client.state)[this.rank]
-    const position = getPosition(loc, this.client.angle)
-    this.group = this.gui.world.group().transform({
-      translateX: position.x,
-      translateY: position.y,
-    })
+    this.group = this.gui.world.group()
     this.group.click(_ => this.client.selectTeam(this.team))
     this.body = this.group.group().transform({
       translateX: 0,
       translateY: 0,
-      rotate: 90 * this.dir,
     })
     const color = teamColors[this.team]
     this.body.circle(0.9).center(0, 0).fill(color)
@@ -60,19 +51,7 @@ export class Unit {
       })
   }
 
-  updatePosition(): void {
-    const offset = this.client.round % unitCount
-    const index = (unitCount - offset + this.rank) % unitCount
-    const loc = stateToLocs(this.client.state)[index]
-    const position = getPosition(loc, this.client.angle)
-    this.group.transform({
-      translateX: position.x,
-      translateY: position.y,
-    })
-  }
-
   setup(): void {
-    this.moving = true
     const offset = this.client.round % unitCount
     const index = (unitCount - offset + this.rank) % unitCount
     const loc = stateToLocs(this.client.state)[index]
@@ -84,12 +63,8 @@ export class Unit {
   }
 
   update(): void {
-    this.body.transform({
-      translateX: 0,
-      translateY: 0,
-    })
-    if (this.client.phase === 'team') {
-      this.updatePosition()
+    if (this.client.phase !== 'move') {
+      this.setup()
     }
   }
 }

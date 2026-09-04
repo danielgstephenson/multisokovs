@@ -22,6 +22,7 @@ export class GUI {
     this.onResize()
     window.addEventListener('resize', () => this.onResize())
     this.world = this.makeWorld()
+    this.world.opacity(0)
     this.grid = new Grid(this)
     this.header = new Header(this)
     range(unitCount).forEach(rank => new Unit(this, rank))
@@ -40,6 +41,7 @@ export class GUI {
     this.header.update()
     this.units.forEach(unit => unit.setup())
     this.updateFocus()
+    this.world.opacity(1)
   }
 
   makeWorld(): G {

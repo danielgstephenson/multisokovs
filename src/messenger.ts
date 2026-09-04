@@ -55,8 +55,8 @@ export class Messenger {
       const playerTeams = new Set(game.players.map(p => p.team))
       const takenTeams = teams.intersection(playerTeams)
       game.takenTeams = [...takenTeams]
-      if (game.takenTeams.length < 2) {
-        game.phase = 'team'
+      if (game.takenTeams.length < 2 && game.phase !== 'team') {
+        game.reset()
       }
       game.players.forEach(player => {
         player.socket.emit('summary', player.summarize())
