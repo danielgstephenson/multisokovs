@@ -55,6 +55,10 @@ export class Game {
 
   advance(dir: number): void {
     this.state = getOutcome(this.state, dir)
+    this.phase = 'move'
+    this.players.forEach(player => {
+      player.socket.emit('move', player.summarize())
+    })
   }
 
   summarize(): GameSummary {

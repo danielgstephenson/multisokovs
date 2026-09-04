@@ -39,6 +39,12 @@ export class Messenger {
         if (game.takenTeams.includes(team)) return
         player.team = team
       })
+      socket.on('act', (dir: number) => {
+        if (game.phase !== 'choice') return
+        const activeTeam = game.round % 2
+        if (player.team !== activeTeam) return
+        game.advance(dir)
+      })
     })
   }
 

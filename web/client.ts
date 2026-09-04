@@ -3,6 +3,7 @@ import { GUI } from './gui.js'
 import { io, Socket } from 'socket.io-client'
 import * as opentype from 'opentype.js'
 import { tickInterval, timeScale } from '../shared/parameters.js'
+import { Input } from './input.js'
 
 export class Client {
   gameId: string
@@ -19,15 +20,19 @@ export class Client {
   phase = 'choice'
   font: opentype.Font
   gui: GUI
+  input: Input
 
   constructor(font: opentype.Font, gameId: string) {
     this.font = font
     this.gameId = gameId
     this.socket = io({ auth: { gameId } })
     this.gui = new GUI(this)
+    this.input = new Input(this)
     this.socket.on('connect', () => {
       console.log('connected', this.socket.id)
     })
+
+    this.socket.on('token', (token: string) => this.checkToken(token))
     this.socket.on('team', (team: number) => {
       this.team = team
     })
@@ -39,7 +44,10 @@ export class Client {
       this.readSummary(summary)
       this.gui.setup()
     })
-    this.socket.on('token', (token: string) => this.checkToken(token))
+    this.socket.on('move', (summary: PlayerSummary) => {
+      this.readSummary(summary)
+      this.gui.units.forEach(unit => unit.move())
+    })
     setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
@@ -57,6 +65,13 @@ export class Client {
   update(): void {
     this.time += tickInterval
     this.gui.update()
+  }
+
+  act(dir: number) {
+    if (this.phase !== 'choice') return
+    const activeTeam = this.round % 2
+    if (activeTeam !== this.team) return
+    this.socket.emit('act', dir)
   }
 
   selectTeam(team: number) {

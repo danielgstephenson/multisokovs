@@ -50,7 +50,7 @@ export class Unit {
     const loc = stateToLocs(this.client.state)[index]
     const position = getPosition(loc, this.client.angle)
     this.group
-      .animate(800 * moveInterval)
+      .animate(700 * moveInterval)
       .transform({
         translateX: position.x,
         translateY: position.y,
