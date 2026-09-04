@@ -1,4 +1,4 @@
-import type { GameSummary } from '../shared/summary.js'
+import type { PlayerSummary } from '../shared/summary.js'
 import { GUI } from './gui.js'
 import { io, Socket } from 'socket.io-client'
 import * as opentype from 'opentype.js'
@@ -10,6 +10,7 @@ export class Client {
   token = ''
   time = 0
   team = -1
+  takenTeams: number[] = []
   angle = 0
   state = 0
   round = 0
@@ -30,11 +31,11 @@ export class Client {
     this.socket.on('team', (team: number) => {
       this.team = team
     })
-    this.socket.on('summary', (summary: GameSummary) => {
+    this.socket.on('summary', (summary: PlayerSummary) => {
       this.readSummary(summary)
       this.gui.update()
     })
-    this.socket.on('setup', (summary: GameSummary) => {
+    this.socket.on('setup', (summary: PlayerSummary) => {
       this.readSummary(summary)
       this.gui.setup()
     })
@@ -42,18 +43,26 @@ export class Client {
     setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
-  readSummary(summary: GameSummary) {
+  readSummary(summary: PlayerSummary) {
     this.state = summary.state
     this.round = summary.round
     this.winner = summary.winner
     this.countdown = summary.countdown
     this.phase = summary.phase
     this.angle = summary.angle
+    this.team = summary.team
+    this.takenTeams = summary.takenTeams
   }
 
   update(): void {
     this.time += tickInterval
     this.gui.update()
+  }
+
+  selectTeam(team: number) {
+    if (this.phase !== 'team') return
+    if (this.takenTeams.includes(team)) return
+    this.socket.emit('selectTeam', team)
   }
 
   checkToken(token: string): void {

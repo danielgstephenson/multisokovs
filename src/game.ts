@@ -4,6 +4,7 @@ import { Messenger } from './messenger.js'
 import { tickInterval } from '../shared/parameters.js'
 import { getStartingState } from './startingState.js'
 import type { GameSummary } from '../shared/summary.js'
+import type { Player } from './player.js'
 
 export class Game {
   time = 0
@@ -12,6 +13,8 @@ export class Game {
   winner = -1
   phase = 'team'
   angle = sample(range(4))
+  takenTeams: number[] = []
+  players: Player[] = []
   state: number
   messenger: Messenger
   id: string
@@ -56,6 +59,7 @@ export class Game {
       winner: this.winner,
       countdown: this.countdown,
       angle: this.angle,
+      takenTeams: this.takenTeams,
     }
   }
 }

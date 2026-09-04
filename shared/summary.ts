@@ -5,4 +5,9 @@ export interface GameSummary {
   winner: number
   countdown: number
   angle: number
+  takenTeams: number[]
+}
+
+export interface PlayerSummary extends GameSummary {
+  team: number
 }

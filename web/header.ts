@@ -30,9 +30,13 @@ export class Header {
       const playerTeamColor = teamColors[this.client.team]
       const fillColor = team === this.client.team ? playerTeamColor : 'black'
       const flashOpacity = 0.5 + 0.5 * Math.sin(6 * this.client.time)
-      const opacity = this.client.phase == 'team' ? flashOpacity : 1
+      const flashing = this.client.phase == 'team'
+      const opacity = flashing ? flashOpacity : 1
       flag.opacity(opacity)
       flag.fill(fillColor)
+      if (this.client.team !== team && this.client.takenTeams.includes(team)) {
+        flag.opacity(0)
+      }
     })
   }
 
@@ -70,6 +74,7 @@ export class Header {
         color: teamColors[team],
         width: 0.1,
       })
+      rect.click(_ => this.client.selectTeam(team))
       this.flags.push(rect)
     })
   }

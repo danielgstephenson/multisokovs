@@ -28,6 +28,7 @@ export class Unit {
       translateX: position.x,
       translateY: position.y,
     })
+    this.group.click(_ => this.client.selectTeam(this.team))
     this.body = this.group.group().transform({
       translateX: 0,
       translateY: 0,

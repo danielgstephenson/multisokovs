@@ -4,6 +4,7 @@ import { makeServer } from './server.js'
 import { type IOServer } from './server.js'
 import { once } from 'node:events'
 import { Game } from './game.js'
+import { Player } from './player.js'
 
 export class Messenger {
   token = `${Math.random()}`
@@ -16,6 +17,7 @@ export class Messenger {
     this.io = makeServer(this.app)
     this.setupIo()
     void this.listen(3000)
+    setInterval(() => this.update(), 100)
   }
 
   setupIo(): void {
@@ -27,10 +29,26 @@ export class Messenger {
         game = new Game(this, gameId)
         this.games.set(gameId, game)
       }
+      const player = new Player(game, socket)
       console.log(socket.id, 'connected')
       void socket.join(gameId)
       socket.emit('token', this.token)
-      socket.emit('setup', game.summarize())
+      socket.emit('setup', player.summarize())
+      socket.on('selectTeam', (team: number) => {
+        if (game.phase !== 'team') return
+        if (game.takenTeams.includes(team)) return
+        player.team = team
+      })
+    })
+  }
+
+  update(): void {
+    this.games.forEach(game => {
+      game.players = game.players.filter(p => p.socket.connected)
+      game.takenTeams = [...new Set(game.players.map(p => p.team))]
+      game.players.forEach(player => {
+        player.socket.emit('summary', player.summarize())
+      })
     })
   }
 
