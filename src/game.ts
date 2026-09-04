@@ -7,6 +7,7 @@ import type { GameSummary } from '../shared/summary.js'
 import type { Player } from './player.js'
 
 export class Game {
+  lastTime = performance.now()
   time = 0
   round = 0
   countdown = 0
@@ -28,8 +29,11 @@ export class Game {
   }
 
   update(): void {
-    this.countdown = Math.max(0, this.countdown - tickInterval)
-    this.time += tickInterval
+    const now = performance.now()
+    const dt = (now - this.lastTime) / 1000
+    this.lastTime = now
+    this.countdown = Math.max(0, this.countdown - dt)
+    this.time += dt
     if (this.phase === 'team') {
       if (this.takenTeams.length > 1) {
         this.phase = 'choice'
@@ -40,7 +44,7 @@ export class Game {
       }
     } else if (this.phase === 'end') {
       if (this.countdown === 0) {
-        this.onMatchComplete()
+        this.reset()
       }
     }
   }
@@ -68,13 +72,12 @@ export class Game {
     if (maxScore > 1 || this.round > maxRound) {
       this.phase = 'end'
       this.countdown = endInterval
+      this.players.forEach(player => {
+        player.socket.emit('matchComplete', this.summarize())
+      })
       return
     }
     this.phase = 'choice'
-  }
-
-  onMatchComplete(): void {
-    this.reset()
   }
 
   advance(dir: number): void {
@@ -109,7 +112,6 @@ export class Game {
       state: this.state,
       round: this.round,
       winner: this.winner,
-      countdown: this.countdown,
       angle: this.angle,
       takenTeams: this.takenTeams,
     }

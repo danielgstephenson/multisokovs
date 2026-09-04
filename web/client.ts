@@ -2,13 +2,14 @@ import type { PlayerSummary } from '../shared/summary.js'
 import { GUI } from './gui.js'
 import { io, type Socket } from 'socket.io-client'
 import * as opentype from 'opentype.js'
-import { tickInterval, timeScale } from '../shared/parameters.js'
+import { endInterval, tickInterval, timeScale } from '../shared/parameters.js'
 import { Input } from './input.js'
 
 export class Client {
   gameId: string
   socket: Socket
   token = ''
+  lastTime = performance.now()
   time = 0
   team = -1
   takenTeams: number[] = []
@@ -44,6 +45,10 @@ export class Client {
       this.readSummary(summary)
       this.gui.units.forEach(unit => unit.move())
     })
+    this.socket.on('matchComplete', (summary: PlayerSummary) => {
+      this.readSummary(summary)
+      this.countdown = endInterval
+    })
     setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
@@ -51,7 +56,6 @@ export class Client {
     this.state = summary.state
     this.round = summary.round
     this.winner = summary.winner
-    this.countdown = summary.countdown
     this.phase = summary.phase
     this.angle = summary.angle
     this.team = summary.team
@@ -59,7 +63,11 @@ export class Client {
   }
 
   update(): void {
-    this.time += tickInterval
+    const now = performance.now()
+    const dt = (now - this.lastTime) / 1000
+    this.lastTime = now
+    this.countdown = Math.max(0, this.countdown - dt)
+    this.time += dt
     this.gui.update()
   }
 

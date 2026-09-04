@@ -3,7 +3,6 @@ export interface GameSummary {
   state: number
   round: number
   winner: number
-  countdown: number
   angle: number
   takenTeams: number[]
 }
