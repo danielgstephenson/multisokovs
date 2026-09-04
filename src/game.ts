@@ -22,9 +22,7 @@ export class Game {
   constructor(messenger: Messenger, id: string) {
     this.messenger = messenger
     this.id = id
-    const level = sample(range(10, 30))
-    const advantage = sample([0, 1])
-    this.state = getStartingState(level, advantage)
+    this.state = this.reset()
     setInterval(() => this.update(), (tickInterval / timeScale) * 1000)
   }
 
@@ -33,7 +31,6 @@ export class Game {
     this.time += tickInterval
     if (this.phase === 'team') {
       if (this.takenTeams.length > 1) {
-        console.log(this.takenTeams)
         this.phase = 'choice'
       }
     } else if (this.phase === 'move') {
@@ -45,6 +42,19 @@ export class Game {
         this.onMatchComplete()
       }
     }
+  }
+
+  reset(): number {
+    const level = sample(range(20, 30))
+    const advantage = sample([0, 1])
+    this.state = getStartingState(level, advantage)
+    this.angle = sample(range(4))
+    this.round = 0
+    this.countdown = 0
+    this.winner = -1
+    this.phase = 'team'
+    this.players.forEach(p => (p.team = -1))
+    return this.state
   }
 
   onMoveComplete(): void {
@@ -63,19 +73,14 @@ export class Game {
   }
 
   onMatchComplete(): void {
-    const losers = [0, 1].filter(i => i !== this.winner)
-    const advantage = sample(losers)
-    const level = sample(range(10, 30))
-    this.state = getStartingState(level, advantage)
-    this.round = 0
-    this.winner = -1
-    this.phase = 'choice'
+    this.reset()
   }
 
   advance(dir: number): void {
-    this.state = getOutcome(this.state, dir)
+    const angleDir = (4 - this.angle + dir) % 4
+    this.state = getOutcome(this.state, angleDir)
     this.phase = 'move'
-    this.countdown = 1
+    this.countdown = 0.8
     this.players.forEach(player => {
       player.socket.emit('move', player.summarize())
     })

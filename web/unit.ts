@@ -60,6 +60,17 @@ export class Unit {
       })
   }
 
+  updatePosition(): void {
+    const offset = this.client.round % unitCount
+    const index = (unitCount - offset + this.rank) % unitCount
+    const loc = stateToLocs(this.client.state)[index]
+    const position = getPosition(loc, this.client.angle)
+    this.group.transform({
+      translateX: position.x,
+      translateY: position.y,
+    })
+  }
+
   setup(): void {
     this.moving = true
     const offset = this.client.round % unitCount
@@ -76,7 +87,9 @@ export class Unit {
     this.body.transform({
       translateX: 0,
       translateY: 0,
-      rotate: 90 * (this.dir + this.client.angle),
     })
+    if (this.client.phase === 'team') {
+      this.updatePosition()
+    }
   }
 }

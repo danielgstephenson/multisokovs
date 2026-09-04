@@ -31,7 +31,6 @@ export class Client {
     this.socket.on('connect', () => {
       console.log('connected', this.socket.id)
     })
-
     this.socket.on('token', (token: string) => this.checkToken(token))
     this.socket.on('team', (team: number) => {
       this.team = team
