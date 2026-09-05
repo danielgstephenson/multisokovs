@@ -59,6 +59,7 @@ export class Game {
     this.winner = -1
     this.phase = 'team'
     this.players.forEach(p => (p.team = -1))
+    this.takenTeams = []
     return this.state
   }
 
@@ -73,7 +74,7 @@ export class Game {
       this.phase = 'end'
       this.countdown = endInterval
       this.players.forEach(player => {
-        player.socket.emit('matchComplete', this.summarize())
+        player.socket.emit('matchComplete', player.summarize())
       })
       return
     }

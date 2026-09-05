@@ -29,16 +29,24 @@ export class Header {
     this.flags.forEach((flag, team) => {
       const playerTeamColor = teamColors[this.client.team]
       const fillColor = team === this.client.team ? playerTeamColor : 'black'
+      flag.fill(fillColor)
+      if (this.client.phase !== 'team') {
+        const alpha = [0, 1].includes(this.client.team) ? 1 : 0
+        flag.opacity(alpha)
+        return
+      }
+      if (this.client.team == team) {
+        flag.opacity(1)
+        return
+      }
+      if (this.client.takenTeams.includes(team)) {
+        flag.opacity(0)
+        return
+      }
       const flashOpacity = 0.5 + 0.5 * Math.sin(6 * this.client.time)
       const flashing = this.client.phase == 'team'
       const opacity = flashing ? flashOpacity : 1
       flag.opacity(opacity)
-      flag.fill(fillColor)
-      if (this.client.phase !== 'team') return
-      if (this.client.team === team) return
-      if (this.client.takenTeams.includes(team)) {
-        flag.opacity(0)
-      }
     })
   }
 
