@@ -18,7 +18,8 @@ export class Messenger {
     this.io = makeServer(this.app)
     this.setupIo()
     const secure = this.io.httpServer instanceof HttpsServer
-    const port = secure ? 443 : 3000
+    const hasEnvPort = process.env.PORT != null
+    const port = hasEnvPort ? Number(process.env.PORT) : secure ? 443 : 3000
     void this.listen(port)
     setInterval(() => this.update(), 100)
   }

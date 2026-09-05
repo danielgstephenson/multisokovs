@@ -3,3 +3,4 @@ dist
 public
 release
 *.pem
+.env
